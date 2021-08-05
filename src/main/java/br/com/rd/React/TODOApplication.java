@@ -2,6 +2,7 @@ package br.com.rd.React;
 
 import br.com.rd.React.model.entity.Task;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.config.Configuration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +20,12 @@ public class TODOApplication {
 	 */
 	@Bean
 	public ModelMapper modelMapper() {
-		return new ModelMapper();
+		//return new ModelMapper();
+		ModelMapper modelMapper = new ModelMapper();
+//		modelMapper.getConfiguration()
+//				.setFieldMatchingEnabled(true) //permite ver
+//				.setFieldAccessLevel(Configuration.AccessLevel.PRIVATE); //Can compare private fields
+		return modelMapper;
 	}
 
 	public static void main(String[] args) {

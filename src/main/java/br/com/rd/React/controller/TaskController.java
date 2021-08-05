@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.xml.ws.Response;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -33,7 +34,7 @@ public class TaskController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     //@RequestBody - o objeto esta vindo da request
-    public TaskDTO create(@RequestBody @Valid TaskDTO task){
+    public TaskDTO create(@RequestBody TaskDTO task){
         return this.taskService.create(task);
     }
 
@@ -44,19 +45,19 @@ public class TaskController {
 
     @GetMapping("/{id}")
     public TaskDTO find(@PathVariable("id") Long id){
-        return null;
+        return this.taskService.find(id);
     }
 
     @PutMapping("/{id}")
     public TaskDTO update(@PathVariable("id") Long id, @RequestBody TaskDTO task){
-        return null;
+        return this.taskService.update(id, task);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable("id") Long id){
-
+        taskService.deleteById(id);
     }
-
 
     /*
     http://localhost:12345?values=firstValue,secondValue,thirdValue
@@ -64,7 +65,20 @@ public class TaskController {
     http://localhost:12345?values=firstValue&values=secondValue&values=thirdValue
     */
     @DeleteMapping("/deleteAll")
-    public void deleteAllById(@RequestParam List<Integer> ids){
-
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteAllById(@RequestParam("ids") List<Long> ids){
+//        List<Long> idss = new ArrayList<>();
+//        for (String i: ids
+//             ) {
+//            Long j = Long.parseLong(i);
+//            idss.add(j);
+//        }
+        taskService.deleteAllById(ids);
     }
+
+//    @DeleteMapping("/deleteAll")
+//    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+//    public void deleteAll(){
+//        taskService.deleteAll();
+//    }
 }
