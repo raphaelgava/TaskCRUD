@@ -6,6 +6,7 @@ import br.com.rd.React.service.implementation.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import javax.validation.Valid;
 import javax.xml.ws.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tasks")  //sempre no plural caso houver uma sub rota
@@ -34,18 +36,41 @@ public class TaskController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     //@RequestBody - o objeto esta vindo da request
-    public TaskDTO create(@RequestBody TaskDTO task){
-        return this.taskService.create(task);
+//    public TaskDTO create(@RequestBody TaskDTO task){
+//        return this.taskService.create(task);
+//    }
+    //@Valid faz a validação do objeto recebido!
+    //? = Wildcard é o nome dado ao identificador ? em códigos genéricos. Ele representa um tipo desconhecido, e pode ser utilizado em algumas situações como um tipo de parâmetro ou uma variável local. O Wildcard sozinho é um sintaxe sugar para <? extends Object>
+    public ResponseEntity<?> create(@Valid @RequestBody TaskDTO task, Errors errors){
+        if (!errors.hasErrors()){
+            //return ResponseEntity.ok(this.taskService.create(task)); //retorna status 200
+            return new ResponseEntity<TaskDTO>(this.taskService.create(task), HttpStatus.CREATED);
+        }
+        return ResponseEntity
+                .badRequest()
+                .body(errors
+                        .getAllErrors()
+                        .stream()
+                        .map(msg -> msg.getDefaultMessage())
+                        .collect(Collectors.joining(",")));
     }
 
     @GetMapping()
-    public List<TaskDTO> findAll(){
-        return this.taskService.findAll();
+//    public List<TaskDTO> findAll(){
+//        return this.taskService.findAll();
+//    }
+    public ResponseEntity<?> findAll(){
+//        return ResponseEntity.ok(this.taskService.findAll());
+        return new ResponseEntity<List>(this.taskService.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public TaskDTO find(@PathVariable("id") Long id){
-        return this.taskService.find(id);
+//    public TaskDTO find(@PathVariable("id") Long id){
+//        return this.taskService.find(id);
+//    }
+    public ResponseEntity<?> find(@PathVariable("id") Long id){
+//        return ResponseEntity.ok(this.taskService.find(id));
+        return new ResponseEntity<TaskDTO>(this.taskService.find(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

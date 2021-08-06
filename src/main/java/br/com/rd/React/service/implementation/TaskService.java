@@ -10,37 +10,48 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.validation.ConstraintViolation;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class TaskService implements TaskServiceInterface {
 
     @Autowired
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @Autowired
-    TaskRepository taskRepository;
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private Validator validator;
 
     @Override
     public TaskDTO create(TaskDTO dto) {
+        // TODO: 05/08/2021 Verificar depois: validações do lado do serviço!!
+        //Set<ConstraintViolation<TaskDTO>> violations = validator.validate(dto);
+
+//        if (!violations.isEmpty()) {
+//            System.out.println("OKAY");
+//        }
+//        else{
+//            System.out.println(violations.toString());
+//        }
         Task task = modelMapper.map(dto, Task.class);
 
         if (task.getDone() == null){
             task.setDone(false);
         }
-
-        Date now = new Date( );
-//        SimpleDateFormat ft =
-//                new SimpleDateFormat ("dd/MM/yyyy hh:mi:ss");
-        task.setUpdateDate(now);
+        //It is not necessary because of @PrePersist
+//        Date now = new Date( );
+////        SimpleDateFormat ft =
+////                new SimpleDateFormat ("dd/MM/yyyy hh:mi:ss");
+//        task.setUpdateDate(now);
         Task response = taskRepository.save(task);
 
         return modelMapper.map(response, TaskDTO.class);
@@ -90,8 +101,8 @@ public class TaskService implements TaskServiceInterface {
             if (dto.getDone() != null){
                 updatedTask.setDone(dto.getDone());
             }
-            updatedTask.setUpdateDate(new Date());
-
+            //It is not necessary because of @PreUpdate
+            //updatedTask.setUpdateDate(new Date());
 
             taskRepository.save(updatedTask);
 
