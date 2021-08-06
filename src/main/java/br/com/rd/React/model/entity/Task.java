@@ -1,5 +1,7 @@
 package br.com.rd.React.model.entity;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -24,6 +26,11 @@ public class Task {
     @NotNull
     @Column(nullable = false)
     private Date updateDate;
+    @NotNull
+    @Column(nullable = false)
+    @Min(value=0, message = "{dto.description.size}")
+    @Max(value=100, message = "{dto.description.size}")
+    private Integer percentage;
 
     @PrePersist //Callback for save method
     //@PreRemove //Callback for delete method
@@ -31,6 +38,10 @@ public class Task {
     public void prePersist(){
         Date now = new Date( );
         this.setUpdateDate(now);
+
+        if (this.percentage == null){
+            this.percentage = 0;
+        }
     }
 
 //    @PreUpdate //Callback for update method

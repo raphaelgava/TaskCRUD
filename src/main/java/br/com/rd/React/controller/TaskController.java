@@ -43,16 +43,21 @@ public class TaskController {
     //? = Wildcard é o nome dado ao identificador ? em códigos genéricos. Ele representa um tipo desconhecido, e pode ser utilizado em algumas situações como um tipo de parâmetro ou uma variável local. O Wildcard sozinho é um sintaxe sugar para <? extends Object>
     public ResponseEntity<?> create(@Valid @RequestBody TaskDTO task, Errors errors){
         if (!errors.hasErrors()){
-            //return ResponseEntity.ok(this.taskService.create(task)); //retorna status 200
-            return new ResponseEntity<TaskDTO>(this.taskService.create(task), HttpStatus.CREATED);
+            return this.taskService.create(task, errors);
         }
-        return ResponseEntity
-                .badRequest()
-                .body(errors
-                        .getAllErrors()
-                        .stream()
-                        .map(msg -> msg.getDefaultMessage())
-                        .collect(Collectors.joining(",")));
+//        return ResponseEntity
+//                .badRequest()
+//                .body(errors
+//                        .getAllErrors()
+//                        .stream()
+//                        .map(msg -> msg.getDefaultMessage())
+//                        .collect(Collectors.joining(",")));
+        return new ResponseEntity<>(errors
+                                        .getAllErrors()
+                                        .stream()
+                                        .map(e -> (e.getCode() + " - " + e.getDefaultMessage()))
+                                        .collect(Collectors.toList()),
+                                        HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping()
@@ -74,8 +79,22 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public TaskDTO update(@PathVariable("id") Long id, @RequestBody TaskDTO task){
-        return this.taskService.update(id, task);
+//    public TaskDTO update(@PathVariable("id") Long id, @RequestBody TaskDTO task){
+//        return this.taskService.update(id, task);
+//    }
+    public ResponseEntity<?>  update(@PathVariable("id") Long id, @RequestBody TaskDTO task, Errors errors){
+        if (!errors.hasErrors()){
+            //return ResponseEntity.ok(this.taskService.create(task)); //retorna status 200
+            //return new ResponseEntity<TaskDTO>(this.taskService.update(id, task), HttpStatus.OK);
+            return this.taskService.update(id, task, errors);
+        }
+        return ResponseEntity
+                .badRequest()
+                .body(errors
+                        .getAllErrors()
+                        .stream()
+                        .map(msg -> msg.getDefaultMessage())
+                        .collect(Collectors.joining(",")));
     }
 
     @DeleteMapping("/{id}")
@@ -89,7 +108,7 @@ public class TaskController {
     OR
     http://localhost:12345?values=firstValue&values=secondValue&values=thirdValue
     */
-    @DeleteMapping("/deleteAll")
+    @DeleteMapping("/deleteAllIds")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteAllById(@RequestParam("ids") List<Long> ids){
 //        List<Long> idss = new ArrayList<>();
@@ -101,9 +120,9 @@ public class TaskController {
         taskService.deleteAllById(ids);
     }
 
-//    @DeleteMapping("/deleteAll")
-//    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-//    public void deleteAll(){
-//        taskService.deleteAll();
-//    }
+    @DeleteMapping("/deleteAll")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteAll(){
+        taskService.deleteAll();
+    }
 }

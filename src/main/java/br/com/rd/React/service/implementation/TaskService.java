@@ -4,12 +4,15 @@ import br.com.rd.React.model.dto.TaskDTO;
 import br.com.rd.React.model.entity.Task;
 import br.com.rd.React.repository.TaskRepository;
 import br.com.rd.React.service.contract.TaskServiceInterface;
+import br.com.rd.React.validator.TaskValidator;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -29,32 +32,51 @@ public class TaskService implements TaskServiceInterface {
     private TaskRepository taskRepository;
 
     @Autowired
-    private Validator validator;
+    private TaskValidator taskValidator;
 
     @Override
-    public TaskDTO create(TaskDTO dto) {
-        // TODO: 05/08/2021 Verificar depois: validações do lado do serviço!!
-        //Set<ConstraintViolation<TaskDTO>> violations = validator.validate(dto);
-
-//        if (!violations.isEmpty()) {
-//            System.out.println("OKAY");
+//    public TaskDTO create(TaskDTO dto) {
+//        Task task = modelMapper.map(dto, Task.class);
+//
+//        if (task.getDone() == null){
+//            task.setDone(false);
 //        }
-//        else{
-//            System.out.println(violations.toString());
-//        }
+//        //It is not necessary because of @PrePersist
+////        Date now = new Date( );
+//////        SimpleDateFormat ft =
+//////                new SimpleDateFormat ("dd/MM/yyyy hh:mi:ss");
+////        task.setUpdateDate(now);
+//        Task response = taskRepository.save(task);
+//
+//        return modelMapper.map(response, TaskDTO.class);
+//    }
+    public ResponseEntity<?> create(TaskDTO dto, Errors errors) {
+        taskValidator.validate(dto, errors);
+        if (errors.hasErrors()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(errors
+                            .getAllErrors()
+                            .stream()
+                            .map(e -> (e.getCode() + " - " + e.getDefaultMessage()))
+                            .collect(Collectors.toList()));
+//            return new ResponseEntity<>(errors
+//                    .getAllErrors()
+//                    .stream()
+//                    .map(e -> (e.getCode() + " - " + e.getDefaultMessage()))
+//                    .collect(Collectors.toList()),
+//                    HttpStatus.BAD_REQUEST);
+        }
         Task task = modelMapper.map(dto, Task.class);
-
         if (task.getDone() == null){
             task.setDone(false);
         }
-        //It is not necessary because of @PrePersist
-//        Date now = new Date( );
-////        SimpleDateFormat ft =
-////                new SimpleDateFormat ("dd/MM/yyyy hh:mi:ss");
-//        task.setUpdateDate(now);
+
         Task response = taskRepository.save(task);
 
-        return modelMapper.map(response, TaskDTO.class);
+//        return ResponseEntity.ok(modelMapper.map(response, TaskDTO.class)); //retorna status 200
+        return new ResponseEntity<>(modelMapper.map(response, TaskDTO.class),
+                HttpStatus.CREATED);
     }
 
     @Override
@@ -89,27 +111,56 @@ public class TaskService implements TaskServiceInterface {
     }
 
     @Override
-    public TaskDTO update(Long id, TaskDTO dto) {
-        TaskDTO response = null;
-
-        if (taskRepository.existsById(id)){
-            Task updatedTask = taskRepository.getById(id);
-            updatedTask.setId(id);
-            if (dto.getDescription() != null) {
-                updatedTask.setDescription(dto.getDescription());
-            }
-            if (dto.getDone() != null){
-                updatedTask.setDone(dto.getDone());
-            }
-            //It is not necessary because of @PreUpdate
-            //updatedTask.setUpdateDate(new Date());
-
-            taskRepository.save(updatedTask);
-
-            response = modelMapper.map(updatedTask, TaskDTO.class);
+//    public TaskDTO update(Long id, TaskDTO dto) {
+//        TaskDTO response = null;
+//
+//        if (taskRepository.existsById(id)){
+//            Task updatedTask = taskRepository.getById(id);
+//            updatedTask.setId(id);
+//            if (dto.getDescription() != null) {
+//                updatedTask.setDescription(dto.getDescription());
+//            }
+//            if (dto.getDone() != null){
+//                updatedTask.setDone(dto.getDone());
+//            }
+//            //It is not necessary because of @PreUpdate
+//            //updatedTask.setUpdateDate(new Date());
+//
+//            taskRepository.save(updatedTask);
+//
+//            response = modelMapper.map(updatedTask, TaskDTO.class);
+//        }
+//
+//        return response;
+//    }
+    public ResponseEntity<?> update(Long id, TaskDTO dto, Errors errors) {
+        taskValidator.validate(taskRepository.existsById(id), dto, errors);
+        if (errors.hasErrors()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(errors
+                            .getAllErrors()
+                            .stream()
+                            .map(e -> (e.getCode() + " - " + e.getDefaultMessage()))
+                            .collect(Collectors.toList()));
         }
 
-        return response;
+        Task updatedTask = taskRepository.getById(id);
+        updatedTask.setId(id);
+        if (dto.getDescription() != null) {
+            updatedTask.setDescription(dto.getDescription());
+        }
+        if (dto.getDone() != null){
+            updatedTask.setDone(dto.getDone());
+        }
+        if (dto.getPercentage() != null){
+            updatedTask.setPercentage(dto.getPercentage());
+        }
+        //It is not necessary because of @PreUpdate
+        //updatedTask.setUpdateDate(new Date());
+
+        taskRepository.save(updatedTask);
+        return ResponseEntity.ok(modelMapper.map(updatedTask, TaskDTO.class));
     }
 
     @Override
