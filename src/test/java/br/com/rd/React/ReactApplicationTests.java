@@ -1,9 +1,9 @@
 package br.com.rd.React;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 
-@SpringBootTest
+@AutoConfigureRestDocs
 class ReactApplicationTests {
 
 	@Test

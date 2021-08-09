@@ -3,8 +3,11 @@ package br.com.rd.React.controller;
 import br.com.rd.React.model.dto.TaskDTO;
 import br.com.rd.React.model.entity.Task;
 import br.com.rd.React.service.implementation.TaskService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -16,8 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Api(value="API REST - Model Task") //swagger - ja entende parte do que o spring faz e já documenta
 @RestController
-@RequestMapping("/tasks")  //sempre no plural caso houver uma sub rota
+@RequestMapping(value="/tasks"
+//        , method = RequestMethod.GET,
+//        , produces = {MediaType.APPLICATION_JSON_VALUE}
+)  //sempre no plural caso houver uma sub rota
 public class TaskController {
 
     @Autowired
@@ -33,6 +40,7 @@ public class TaskController {
     @ResponseStatus
      */
 
+    @ApiOperation(value="Create task data in data base")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     //@RequestBody - o objeto esta vindo da request
@@ -60,7 +68,8 @@ public class TaskController {
                                         HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping()
+    @ApiOperation(value="Find all task data in data base")
+    @GetMapping(produces="application/json")
 //    public List<TaskDTO> findAll(){
 //        return this.taskService.findAll();
 //    }
@@ -69,6 +78,7 @@ public class TaskController {
         return new ResponseEntity<List>(this.taskService.findAll(), HttpStatus.OK);
     }
 
+    @ApiOperation(value="Find task data by id in data base")
     @GetMapping("/{id}")
 //    public TaskDTO find(@PathVariable("id") Long id){
 //        return this.taskService.find(id);
@@ -78,6 +88,7 @@ public class TaskController {
         return new ResponseEntity<TaskDTO>(this.taskService.find(id), HttpStatus.OK);
     }
 
+    @ApiOperation(value="Update task data in data base")
     @PutMapping("/{id}")
 //    public TaskDTO update(@PathVariable("id") Long id, @RequestBody TaskDTO task){
 //        return this.taskService.update(id, task);
@@ -97,6 +108,7 @@ public class TaskController {
                         .collect(Collectors.joining(",")));
     }
 
+    @ApiOperation(value="Remove task data by id in data base")
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable("id") Long id){
@@ -108,6 +120,7 @@ public class TaskController {
     OR
     http://localhost:12345?values=firstValue&values=secondValue&values=thirdValue
     */
+    @ApiOperation(value="Remove all task data in data base")
     @DeleteMapping("/deleteAllIds")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteAllById(@RequestParam("ids") List<Long> ids){
