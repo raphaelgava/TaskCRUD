@@ -4,9 +4,11 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
+import java.io.Serializable;
 
 @Data
-public class TaskDTO {
+public class TaskDTO{// implements Serializable {
+    //private static final long serialVersionUID = 1L;
     private Long id;
     //@NotNull @NotEmpty(message = "Please provide the description")
     @NotNull @NotEmpty(message = "{dto.description.empty}")
